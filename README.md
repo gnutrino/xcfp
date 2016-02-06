@@ -13,8 +13,9 @@ The main class for this libray is CharacterPool,
 from xcfp.lib import CharacterPool
 
 with CharacterPool('/path/to/file.bin') as pool:
+	pool.read_header()
     print("Number of characters in file: {}".format(pool.count))
 
 	for char in pool.characters():
-		print("{} {} {}".format(char.strFirstName, char.strNickName, char.strLastName))
+		print(char)
 ```
