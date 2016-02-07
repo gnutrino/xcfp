@@ -8,6 +8,6 @@ if __name__ == "__main__":
         print("Usage: {} character_file".format(argv[0]))
         exit(1)
 
-    with CharacterPool(argv[1]) as pool:
-        for char in pool.characters():
-            print(char)
+    pool = CharacterPool(argv[1])
+    for char in pool.characters():
+        print(char)
