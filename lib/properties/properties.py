@@ -1,33 +1,32 @@
+#!/usr/bin/python3
+
 import struct
 
 class PropertyError(Exception):
     pass
 
 class PropertyType(type):
-    """Meta class for properties that automatically registers Properties and
-    allows querying them by name"""
+    """Meta class for properties"""
 
-    KnownTypes = {}
+    knownTypes = {}
 
-    def __new__(cls, name, bases=None, namespace=None, **kwargs):
+    def __new__(cls, name, *args, **kwargs):
 
         # Allows Proprty Types to be retrived by string name as ProprtyType(str)
-        if name in cls.KnownTypes:
-            return cls.KnownTypes[name]
+        if len(args) == 0:
+            if name not in cls.knownTypes:
+                raise TypeError("Unknown PropertyType: {}".format(name))
+            return cls.knownTypes[name]
 
-        #if we called PropertyType with just a string and didn't find it in
-        #KnownTypes we need to throw an error
-        if bases is None or namespace is None:
-            raise TypeError("Unknown PropertyType: {}".format(name))
-
-        result = super().__new__(cls, name, bases, namespace, **kwargs)
+        result = super().__new__(cls, name, *args, **kwargs)
 
         #lets us define abstract base classes that don't go into the KnowTypes
-        #dict by leaving off the typename property
+        #dict by leaving off the typename attribute
         if hasattr(result, 'typename'):
-            cls.KnownTypes[result.typename] = result
+            cls.knownTypes[result.typename] = result
 
         return result
+
 
 class Property(metaclass=PropertyType):
     """Base class for properties"""
@@ -108,27 +107,3 @@ class NameProperty(Property):
         val = IntProperty._unpack(data[-4:])
         return (name, val)
 
-class StructProprty(Property):
-    """Struct Property - a struct represented as a sequence of properties ended
-    with 'None'"""
-
-    typename = 'StructProperty'
-
-    def unpack(self, data):
-        from .parser import Parser
-        import io
-        with Parser(io.BytesIO(data)) as parser:
-            for prop in parser.properties():
-                setattr(self, prop.name, prop)
-
-        return self
-
-    def __str__(self):
-        return self.name
-
-    @classmethod
-    def data_read_hook(cls, parser, size):
-        cls.structname = parser.read_str()
-        parser.skip_padding()
-
-        return size
