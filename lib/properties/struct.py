@@ -1,35 +1,9 @@
 #!/usr/bin/python
 from collections import OrderedDict
 
-from .properties import PropertyType, Property
+from . import PropertyType, Property
 
-class StructType(PropertyType):
-    """Meta class for struct types"""
-
-    structTypes = {}
-
-    def __new__(cls, name, *args, **kwargs):
-
-        #Allows StructProperty subclasses to be retrieved by structname as
-        #StructType(str)
-        if len(args) == 0:
-            if name not in cls.structTypes:
-                raise TypeError("Unknown Struct Type: {}".format(name))
-            return cls.structTypes[name]
-
-        (bases, namespace) = args
-        #if we don't declare a structtype attribute we're in a base class that
-        #should be hanled by the parent metaclass
-        if 'structtype' not in namespace:
-            return super().__new__(cls, name, *args, **kwargs)
-        else:
-            #otherwise we use type directly to create the structtype to stop it
-            #going in knownTypes
-            struct = type.__new__(cls, name, *args, **kwargs)
-            cls.structTypes[struct.structtype] = struct
-            return struct
-
-class StructProperty(Property, metaclass=StructType):
+class StructProperty(Property):
     """Struct Property - a struct represented as a sequence of properties ended
     with 'None'"""
 
@@ -44,12 +18,9 @@ class StructProperty(Property, metaclass=StructType):
 
         return self
 
-    def __str__(self):
-        return self.name
-
     @classmethod
     def data_read_hook(cls, parser, size):
-        cls.structname = parser.read_str()
+        cls.typename = parser.read_str()
         parser.skip_padding()
 
         return size
@@ -57,13 +28,57 @@ class StructProperty(Property, metaclass=StructType):
 class AppearanceStruct(StructProperty):
     """represents a TAppearance struct in a character file"""
 
-    structtype = 'TAppearance'
+    typename = 'TAppearance'
 
     fields = OrderedDict((
-        #(name, (type, defualt))
         #defaults taken from Ana Ramirez from the Demos&Replays.bin file that
         #comes with the game
-        ('nmHead',  ('NameProperty', ('LatFem_C', 0))),
-        ('iGender', ('IntProperty', 2)),
-        ('iRace',   ('IntProperty', 3)),
+        #(name,                 (type,                                  default))
+        ('nmHead',              ('NameProperty',                ('LatFem_C', 0))),
+        ('iGender',             ('IntProperty',                               2)),
+        ('iRace',               ('IntProperty',                               3)),
+
+        ('nmHaircut',           ('NameProperty',         ('Female_LongWavy', 0))),
+        ('iHairColor',          ('IntProperty',                               0)),
+        ('iFacialHair',         ('IntProperty',                               0)),
+        ('nmBeard',             ('NameProperty',                    ('None', 0))),
+
+        ('iSkinColor',          ('IntProperty',                               5)),
+        ('iEyeColor',           ('IntProperty',                              15)),
+
+        ('nmFlag',              ('NameProperty',          ('Country_Mexico', 0))),
+
+        ('iVoice',              ('IntProperty',                              14)),
+        ('iAttitude',           ('IntProperty',                               0)),
+
+        ('iArmorDeco',          ('IntProperty',                              -1)),
+        ('iArmorTint',          ('IntProperty',                              31)),
+        ('iArmorTintSecondary', ('IntProperty',                              10)),
+        ('iWeaponTint',         ('IntProperty',                              -1)),
+        ('iTattooTint',         ('IntProperty',                              -1)),
+
+        ('nmWeaponPattern',     ('NameProperty',             ('Pat_Nothing', 0))),
+
+        ('nmPawn',              ('NameProperty',                    ('None', 0))),
+
+        ('nmTorso',             ('NameProperty',          ('CnvMed_Std_C_F', 0))),
+        ('nmArms',              ('NameProperty',          ('CnvMed_Std_F_F', 0))),
+        ('nmLegs',              ('NameProperty',          ('CnvMed_Std_C_F', 0))),
+        ('nmHelmet',            ('NameProperty',     ('Helmet_0_NoHelmet_F', 0))),
+        ('nmEye',               ('NameProperty',             ('DefaultEyes', 3))),
+        ('nmTeeth',             ('NameProperty',            ('DefaultTeeth', 0))),
+        ('nmFacePropLower',     ('NameProperty',    ('Prop_FaceLower_Blank', 0))),
+
+        ('nmPatterns',          ('NameProperty',             ('Pat_Nothing', 0))),
+
+        ('nmVoice',             ('NameProperty', ('FemaleVoice1_English_US', 0))),
+        ('nmLanguage',          ('NameProperty',                    ('None', 0))),
+
+        ('nmTattoo_LeftArm',    ('NameProperty',       ('Tattoo_Arms_BLANK', 0))),
+        ('nmTattoo_RightArm',   ('NameProperty',       ('Tattoo_Arms_BLANK', 0))),
+        ('nmScars',             ('NameProperty',             ('Scars_BLANK', 0))),
+
+        ('nmTorsoUnderlay',     ('NameProperty',     ('CnvUnderlay_std_A_F', 0))),
+        ('nmArmsUnderlay',      ('NameProperty',     ('CnvMed_Underlay_A_F', 0))),
+        ('nmLegsUnderlay',      ('NameProperty',     ('CnvUnderlay_std_A_F', 0))),
     ))
