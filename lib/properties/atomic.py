@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
 import struct
-from . import Property
+from . import Property, PropertyError
 
 class IntProperty(Property):
     """Integer Property - represented as a little endian DWORD"""
 
     typename = 'IntProperty'
+    expected_type = int
 
     @classmethod
     def _unpack(cls, data):
@@ -23,6 +24,7 @@ class BoolProperty(Property):
     else is True"""
 
     typename = 'BoolProperty'
+    expected_type = bool
 
     @classmethod
     def _unpack(cls, data):
@@ -41,6 +43,7 @@ class StrProperty(Property):
     encoding"""
 
     typename = 'StrProperty'
+    expected_type = str
 
     @classmethod
     def _unpack(cls, data):
@@ -56,6 +59,20 @@ class NameProperty(Property):
     tuple"""
 
     typename = 'NameProperty'
+    expected_type = str
+
+    def _set(self, value):
+        try:
+            (name, param) = value
+        except ValueError:
+            (name, param) = (value, 0)
+
+        if not isinstance(param, int):
+            raise PropertyError(
+                    "Tried to set NameProperty.param with non-int type: {}"
+                    .format(type(param).__name__)
+                )
+        super()._set(name)
 
     @classmethod
     def _unpack(cls, data):

@@ -1,49 +1,38 @@
 from .properties import Property
-from collections import OrderedDict
+from .property_set import PropertySet
 
-class Character():
+class Character(PropertySet):
     """Represents an XCOM 2 character in a character pool file"""
 
     # template for per instance field OrederedDicts
-    _fields = OrderedDict((
-        # name : (property_type, default)
-        ('strFirstName', ('StrProperty', '')),
-        ('strLastName',  ('StrProperty', '')),
-        ('strNickName',  ('StrProperty', '')),
+    firstName = Property('strFirstName', 'StrProperty', '')
+    lastName  = Property('strLastName', 'StrProperty', '')
+    nickName  = Property('strNickName', 'StrProperty', '')
 
-        ('m_SoldierClassTemplateName', ('NameProperty', ('Rookie', 0))),
-        ('CharacterTemplateName',       ('NameProperty', ('Soldier', 0))),
+    soldierClass = Property('m_SoldierClassTemplateName', 'NameProperty', 'Rookie')
+    characterTemplate = Property('CharacterTemplateName', 'NameProperty', 'Soldier')
 
-        ('kAppearance', ('TAppearance', None)),
+    appearance = Property('kAppearance', 'TAppearance')
 
-        ('Country', ('NameProperty', ('Country_UK', 0))),
+    country = Property('Country', 'NameProperty', 'Country_UK')
 
-        ('AllowedTypeSoldier', ('BoolProperty', True)),
-        ('AllowedTypeVIP',     ('BoolProperty', True)),
-        ('AllowedTypeDarkVIP', ('BoolProperty', True)),
+    allowedTypeSoldier = Property('AllowedTypeSoldier', 'BoolProperty', True)
+    allowedTypeVIP     = Property('AllowedTypeVIP',     'BoolProperty', True)
+    allowedTypeDarkVIP = Property('AllowedTypeDarkVIP', 'BoolProperty', True)
 
-        ('PoolTimestamp',  ('StrProperty', '')),
-        ('BackgroundText', ('StrProperty', '')),
-    ))
+    timestamp = Property('PoolTimestamp', 'StrProperty', '')
+    biography = Property('BackgroundText', 'StrProperty', '')
 
     def __init__(self):
-        # keep an OrderedDict of the actual property objects for use when
-        # writing out to file
-        self.fields = OrderedDict()
-
-        for name, args in self._fields.items():
-            prop = Property(name, *args)
-            self.fields[name] = prop
-            setattr(self, name, prop)
+        self.fields = {}
 
     def __str__(self):
-        fields = [str(x) for x in (self.strFirstName, self.strNickName, self.strLastName) if str(x)]
-
+        fields = filter(None, (self.firstName, self.nickName, self.lastName))
         return ' '.join(fields)
 
     def details(self):
         result = ""
-        for name in self._fields.keys():
+        for name in self.field_names.keys():
             result += "{}: {}\n".format(name, getattr(self, name))
 
         return result

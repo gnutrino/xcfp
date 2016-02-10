@@ -15,7 +15,5 @@ class CharacterPool():
 
             for _ in range(count):
                 char = Character()
-                for prop in parser.properties():
-                    setattr(char, prop.name, prop)
-
+                char.add_properties(parser.properties())
                 yield char

@@ -10,4 +10,4 @@ if __name__ == "__main__":
 
     pool = CharacterPool(argv[1])
     for char in pool.characters():
-        print(char)
+        print(char.details())

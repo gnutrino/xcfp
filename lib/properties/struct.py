@@ -9,6 +9,9 @@ class StructProperty(Property):
 
     typename = 'StructProperty'
 
+    def _get(self):
+        return self
+
     def unpack(self, data):
         from ..parser import Parser
         import io
@@ -17,6 +20,9 @@ class StructProperty(Property):
                 setattr(self, prop.name, prop)
 
         return self
+
+    def __str__(self):
+        return "<struct: {}>".format(self.typename)
 
     @classmethod
     def data_read_hook(cls, parser, size):
