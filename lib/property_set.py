@@ -13,7 +13,7 @@ class PropertySetMeta(type):
         return OrderedDict()
 
     def __new__(cls, name, bases, namespace, **kwargs):
-        result = type.__new__(cls, name, bases, dict(namespace))
+        result = super().__new__(cls, name, bases, dict(namespace))
         result.field_names = OrderedDict()
         for name, value in namespace.items():
             if not isinstance(value, Property):

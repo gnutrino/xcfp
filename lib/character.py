@@ -23,9 +23,6 @@ class Character(PropertySet):
     timestamp = Property('PoolTimestamp', 'StrProperty', '')
     biography = Property('BackgroundText', 'StrProperty', '')
 
-    def __init__(self):
-        self.fields = {}
-
     def __str__(self):
         fields = filter(None, (self.firstName, self.nickName, self.lastName))
         return ' '.join(fields)

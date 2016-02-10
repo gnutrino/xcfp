@@ -14,7 +14,7 @@ class PropertyType(type):
                 raise TypeError("Unknown PropertyType: {}".format(name))
             return cls.knownTypes[name]
 
-        result = type.__new__(cls, name, *args, **kwargs)
+        result = super().__new__(cls, name, *args, **kwargs)
 
         #lets us define abstract base classes that don't go into the KnowTypes
         #dict by leaving off the typename attribute
@@ -72,7 +72,7 @@ class Property(metaclass=PropertyType):
         self.value = value
 
     def unpack(self, data):
-        self.value = self._unpack(data)
+        self._set(self._unpack(data))
         return self
 
     @classmethod
