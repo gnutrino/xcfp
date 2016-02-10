@@ -1,6 +1,6 @@
 #/usr/bin/python3
 import struct
-from .properties import PropertyType
+from .properties import PropertyType, Property
 
 class XCFParseError(Exception):
     pass
@@ -117,13 +117,12 @@ class Parser():
 
         #add a hook to modify size or read extra data if necessary because some properties don't
         #quite follow standard format
-        try:
+        if hasattr(proptype, 'data_read_hook'): 
             size = proptype.data_read_hook(self, size)
-        except AttributeError:
-            pass
 
         data = self.read(size)
-        return proptype(name).unpack(data)
+
+        return Property(name, proptype.typename).unpack(data)
 
     def read(self, size):
         buf = self.file.read(size)

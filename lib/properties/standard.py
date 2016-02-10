@@ -1,51 +1,7 @@
 #!/usr/bin/python3
 
 import struct
-
-class PropertyError(Exception):
-    pass
-
-class PropertyType(type):
-    """Meta class for properties"""
-
-    knownTypes = {}
-
-    def __new__(cls, name, *args, **kwargs):
-
-        # Allows Proprty Types to be retrived by string name as ProprtyType(str)
-        if len(args) == 0:
-            if name not in cls.knownTypes:
-                raise TypeError("Unknown PropertyType: {}".format(name))
-            return cls.knownTypes[name]
-
-        result = super().__new__(cls, name, *args, **kwargs)
-
-        #lets us define abstract base classes that don't go into the KnowTypes
-        #dict by leaving off the typename attribute
-        if hasattr(result, 'typename'):
-            cls.knownTypes[result.typename] = result
-
-        return result
-
-
-class Property(metaclass=PropertyType):
-    """Base class for properties"""
-
-    def __init__(self, name, value=None):
-        self.name = name
-        if value is not None:
-            self.value = value
-
-    def __str__(self):
-        return str(self.value)
-
-    def unpack(self, data):
-        self.value = self._unpack(data)
-        return self
-
-    @classmethod
-    def _unpack(cls, data):
-        raise NotImplementedError()
+from . import Property
 
 class IntProperty(Property):
     """Integer Property - represented as a little endian DWORD"""
@@ -106,4 +62,3 @@ class NameProperty(Property):
         name = StrProperty._unpack(data[:-4])
         val = IntProperty._unpack(data[-4:])
         return (name, val)
-
