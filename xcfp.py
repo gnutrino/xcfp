@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from struct import pack,unpack
-from lib import CharacterPool
+from xcfp import CharacterPool
 
 if __name__ == "__main__":
     from sys import argv

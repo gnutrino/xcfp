@@ -19,9 +19,24 @@ class PropertyType(type):
         #lets us define abstract base classes that don't go into the KnowTypes
         #dict by leaving off the typename attribute
         if hasattr(result, 'typename'):
-            cls.knownTypes[result.typename] = result
+            cls.register(result)
 
         return result
+
+    @classmethod
+    def register(cls, property_cls, name = None):
+        if name is None:
+            name = property_cls.typename
+        cls.knownTypes[name] = property_cls
+
+    @classmethod
+    def deregister(cls, key):
+        if key in cls.knownTypes:
+            del cls.knownTypes[key]
+        elif hasattr(key, 'typename') and key.typename in cls.knownTypes:
+            del cls.knownTypes[key.typename]
+        else:
+            raise TypeError("Tried to deregister unkown PropertyType: {}".format(key))
 
 class Property(metaclass=PropertyType):
     """Base class for properties"""
@@ -38,7 +53,7 @@ class Property(metaclass=PropertyType):
         delegate_cls = PropertyType(property_type)
         return delegate_cls.__new__(delegate_cls, *args)
 
-    def __init__(self, name, type, value=None):
+    def __init__(self, name, typename, value=None):
         self.name = name
         if value is not None:
             self._set(value)
@@ -71,12 +86,8 @@ class Property(metaclass=PropertyType):
 
         self.value = value
 
-    def unpack(self, data):
-        self._set(self._unpack(data))
-        return self
-
     @classmethod
-    def _unpack(cls, data):
+    def unpack(cls, data):
         raise NotImplementedError()
 
 #make sure modules with Property subclasses get loaded whenever this package is

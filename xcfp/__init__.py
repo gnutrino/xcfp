@@ -1,3 +1,3 @@
 from .character import Character
-from .properties import PropertyType
+from .properties import Property
 from .pool import CharacterPool

@@ -10,7 +10,7 @@ class IntProperty(Property):
     expected_type = int
 
     @classmethod
-    def _unpack(cls, data):
+    def unpack(cls, data):
         return struct.unpack('<i', data)[0]
 
 class ArrayProperty(IntProperty):
@@ -27,7 +27,7 @@ class BoolProperty(Property):
     expected_type = bool
 
     @classmethod
-    def _unpack(cls, data):
+    def unpack(cls, data):
         return struct.unpack('?', data)[0]
 
     #BoolProperty gives incorrect size - should be 1 but shows as 0
@@ -46,8 +46,8 @@ class StrProperty(Property):
     expected_type = str
 
     @classmethod
-    def _unpack(cls, data):
-        size = IntProperty._unpack(data[:4])
+    def unpack(cls, data):
+        size = IntProperty.unpack(data[:4])
         if len(data[4:]) != size:
             raise PropertyError("Incorrect String Size in StrProperty: {}".format(size))
         return data[4:-1].decode("latin_1")
@@ -75,7 +75,7 @@ class NameProperty(Property):
         super()._set(name)
 
     @classmethod
-    def _unpack(cls, data):
-        name = StrProperty._unpack(data[:-4])
-        val = IntProperty._unpack(data[-4:])
+    def unpack(cls, data):
+        name = StrProperty.unpack(data[:-4])
+        val = IntProperty.unpack(data[-4:])
         return (name, val)

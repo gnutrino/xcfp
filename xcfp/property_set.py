@@ -24,8 +24,14 @@ class PropertySetMeta(type):
 class PropertySet(metaclass=PropertySetMeta):
     """Base class for classes that consist of a set of named properties"""
 
-    def __init__(self):
+    def __init__(self, properties=None, **kwargs):
         self.fields = {}
+        if properties is not None:
+            self.add_properties(properties)
+
+        for key,value in kwargs.items():
+            if key in self.field_names:
+                setattr(self, key, value)
 
     def add_property(self, property):
         self.fields[property.name] = property

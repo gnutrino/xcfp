@@ -23,20 +23,18 @@ class StructProperty(Property, PropertySet, metaclass=StructMeta):
 
     typename = 'StructProperty'
 
-    def __init__(self, *args):
-        PropertySet.__init__(self)
-        Property.__init__(self, *args)
+    def __init__(self, name, typename, properties=None, **kwargs):
+        self.name = name
+        PropertySet.__init__(self, properties, **kwargs)
 
     def _get(self):
         return self
 
-    def unpack(self, data):
+    @classmethod
+    def unpack(cls, data):
         from ..parser import Parser
         import io
-        with Parser(io.BytesIO(data)) as parser:
-            self.add_properties(parser.properties())
-
-        return self
+        return Parser(io.BytesIO(data)).properties()
 
     def __str__(self):
         return "<struct: {}>".format(self.typename)

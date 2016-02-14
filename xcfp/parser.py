@@ -1,5 +1,6 @@
 #/usr/bin/python3
 import struct
+import io
 from .properties import PropertyType, Property
 
 class XCFParseError(Exception):
@@ -56,7 +57,7 @@ class Parser():
         file"""
         try:
             self.file.seek(0)
-        except IOError:
+        except io.UnsupportedOperation:
             pass
 
         magic = self.read_int()
@@ -64,7 +65,15 @@ class Parser():
         if magic != -1:
             raise XCFParseError("Incorrect Magic Number on file {}: {}".format(self.fname, magic))
 
-        count = self.expect('CharacterPool', 'ArrayProperty').value
+        prop = self.read_property()
+
+        # empty files don't have a CharacterPool property
+        if prop.name == 'PoolFileName':
+            self.expect('None')
+            return 0
+        elif prop.name != 'CharacterPool':
+            raise XCFParseError("Expected Property CharacterPool:ArrayPropery, got {}:{}".format(prop.name, prop.typename))
+        count = prop.value
 
         #I'm not actually convinced this is used, even if it is we're best
         #discarding it and recreating from the actual file name on write
@@ -121,8 +130,9 @@ class Parser():
             size = proptype.data_read_hook(self, size)
 
         data = self.read(size)
+        value = proptype.unpack(data)
 
-        return Property(name, proptype.typename).unpack(data)
+        return Property(name, proptype.typename, value)
 
     def read(self, size):
         buf = self.file.read(size)
@@ -135,6 +145,9 @@ class Parser():
 
     def read_str(self):
         size = self.read_int()
+        if size == 0:
+            return ''
+
         bstr = self.read(size)
 
         #strings should be null terminated
